@@ -1,0 +1,58 @@
+# compose file for DEV Environment
+# docker compose should run using base compose file as
+# it uses frontend and backend service's image creation from base compose file
+# Command - docker compose -f docker-compose.yml -f docker-compose-dev.yml up -d
+
+# name of the application, will not consider directory name as application name
+name: UserDataApp_Dev
+
+# define all services
+services:
+  # service 1
+  frontend:
+    container_name: frontend-dev
+    ports:
+      - 4040:4040
+    env_file:
+      - ./frontend/config/.env-dev
+    networks:
+      - dev_frontend_network # network to communicate with backend 
+    depends_on:
+      - backend # depends on this service to add user and get user data into database
+  
+  # service 2
+  backend:
+    container_name: backend-dev
+    ports:
+      - 3030:3030
+    env_file:
+      - ./backend/config/.env-dev
+    networks:
+      - dev_frontend_network  # network to communicate with frontend  
+      - dev_backend_network   # network to communicate with mssqldb
+    depends_on:
+      - mssqldevdb # writes data into mssqldb
+
+  # service 3
+  mssqldevdb:
+    image: rajatjain20/mssqldb_dev_i:v0
+    container_name: mssqldb-dev
+    build:
+      context: ./database
+      dockerfile: Dockerfile
+    environment:
+      - MSSQL_SA_PASSWORD=admin@123 # this will be used only for entrypoint.
+    networks:
+      dev_backend_network:
+        aliases:  # if not provided, will have container name as servername(dns)
+          - mssqldevdb # server can be accessible from other containers with this servername(dns)
+
+# define network, this should not be created outside this file.
+# else have to define attribute external:true    
+networks:
+  dev_frontend_network:
+    name: dev_frontend_network
+    driver: bridge
+  dev_backend_network:
+    name: dev_backend_network
+    driver: bridge

@@ -1,0 +1,59 @@
+# compose file for PROD Environment
+# docker compose should run using base compose file as
+# it uses frontend and backend service's image creation from base compose file
+# Command - docker compose -f docker-compose.yml -f docker-compose-prod.yml up -d
+
+
+# name of the application, will not consider directory name as application name
+name: UserDataApp_Prod
+
+# define all services
+services:
+  # service 1
+  frontend:
+    container_name: frontend-prod
+    ports:
+      - 4042:4042
+    env_file:
+      - ./frontend/config/.env-prod
+    networks:
+      - prod_frontend_network # network to communicate with backend 
+    depends_on:
+      - backend # depends on this service to add user and get user data into database
+  
+  # service 2
+  backend:
+    container_name: backend-prod
+    ports:
+      - 3032:3032
+    env_file:
+      - ./backend/config/.env-prod
+    networks:
+      - prod_frontend_network  # network to communicate with frontend  
+      - prod_backend_network   # network to communicate with mssqldb
+    depends_on:
+      - mssqlproddb # writes data into mssqldb
+
+  # service 3
+  mssqlproddb:
+    image: rajatjain20/mssqldb_prod_i:v0
+    container_name: mssqldb-prod
+    build:
+      context: ./database
+      dockerfile: Dockerfile
+    environment:
+      - MSSQL_SA_PASSWORD=admin@123 # this will be used only for entrypoint.
+    networks:
+      prod_backend_network:
+        aliases:  # if not provided, will have container name as servername(dns)
+          - mssqlprddb # server can be accessible from other containers with this servername(dns)
+
+# define network, this should not be created outside this file.
+# else have to define attribute external:true    
+networks:
+  prod_frontend_network:
+    name: prod_frontend_network
+    driver: bridge
+  prod_backend_network:
+    name: prod_backend_network
+    driver: bridge

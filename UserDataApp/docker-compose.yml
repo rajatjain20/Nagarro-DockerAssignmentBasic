@@ -1,0 +1,68 @@
+# Single compose file to define and run the application
+# Command: > docker compose up -d
+
+# define all services
+services:
+  # service 1
+  frontend:
+    image: rajatjain20/frontend_i:v0
+    container_name: frontend_c
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    ports:
+      - 4040:4040
+    environment:
+      - ENV_NAME=DEV
+      - PORT=4040
+      - BACKEND_PORT=3030
+    networks:
+      - frontend_network # network to communicate with backend 
+    depends_on:
+      - backend # depends on this service to add user and get user data into database
+  
+  # service 2
+  backend:
+    image: rajatjain20/backend_i:v0
+    container_name: backend_c
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    ports:
+      - 3030:3030
+    environment:
+      - ENV_NAME=DEV
+      - PORT=3030
+      - MSSQL_SERVER=mssqldb
+      - MSSQL_DBNAME=UserData
+      - MSSQL_USER=sa
+      - MSSQL_PASS=admin@1234
+    networks:
+      - frontend_network  # network to communicate with frontend  
+      - backend_network   # network to communicate with mssqldb
+    depends_on:
+      - mssqldb # writes data into mssqldb
+
+  # service 3
+  mssqldb:
+    image: rajatjain20/mssqldb_i:v0
+    container_name: mssqldb_c
+    build:
+      context: ./database
+      dockerfile: Dockerfile
+    environment:
+      - MSSQL_SA_PASSWORD=admin@123 # this will be used only for entrypoint.
+    networks:
+      backend_network:
+        aliases:  # if not provided, will have container name as servername(dns)
+          - mssqldb # server can be accessible from other containers with this servername(dns)
+
+# define network, this should not be created outside this file.
+# else have to define attribute external:true    
+networks:
+  frontend_network:
+    name: frontend_network
+    driver: bridge
+  backend_network:
+    name: backend_network
+    driver: bridge

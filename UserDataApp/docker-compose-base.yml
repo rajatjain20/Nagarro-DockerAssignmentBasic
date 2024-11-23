@@ -1,0 +1,21 @@
+# This is the base image of all the environments
+# We can have same image for frontend/backend
+# But to keep different database for all environments
+# I have created separate databae images for all environments in their respective compose files
+
+# define all services
+services:
+  # service 1
+  frontend:
+    image: rajatjain20/frontend_i:v0
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    
+  # service 2
+  backend:
+    image: rajatjain20/backend_i:v0
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+

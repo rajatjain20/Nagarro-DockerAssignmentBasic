@@ -1,0 +1,58 @@
+# compose file for TEST Environment
+# docker compose should run using base compose file as
+# it uses frontend and backend service's image creation from base compose file
+# Command - docker compose -f docker-compose.yml -f docker-compose-test.yml up -d
+
+# name of the application, will not consider directory name as application name
+name: UserDataApp_Test
+
+# define all services
+services:
+  # service 1
+  frontend:
+    container_name: frontend-test
+    ports:
+      - 4041:4041
+    env_file:
+      - ./frontend/config/.env-test
+    networks:
+      - test_frontend_network # network to communicate with backend 
+    depends_on:
+      - backend # depends on this service to add user and get user data into database
+  
+  # service 2
+  backend:
+    container_name: backend-test
+    ports:
+      - 3031:3031
+    env_file:
+      - ./backend/config/.env-test
+    networks:
+      - test_frontend_network  # network to communicate with frontend  
+      - test_backend_network   # network to communicate with mssqldb
+    depends_on:
+      - mssqltstdb # writes data into mssqldb
+
+  # service 3
+  mssqltstdb:
+    image: rajatjain20/mssqldb_test_i:v0
+    container_name: mssqldb-test
+    build:
+      context: ./database
+      dockerfile: Dockerfile
+    environment:
+      - MSSQL_SA_PASSWORD=admin@123 # this will be used only for entrypoint.
+    networks:
+      test_backend_network:
+        aliases:  # if not provided, will have container name as servername(dns)
+          - mssqltstdb # server can be accessible from other containers with this servername(dns)
+
+# define network, this should not be created outside this file.
+# else have to define attribute external:true    
+networks:
+  test_frontend_network:
+    name: test_frontend_network
+    driver: bridge
+  test_backend_network:
+    name: test_backend_network
+    driver: bridge
