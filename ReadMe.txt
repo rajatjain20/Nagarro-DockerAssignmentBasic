@@ -1,4 +1,4 @@
-###Project Overview:
+Project Overview:
 
 	I have built a multiservice application "UserDataApp", where there will be three services - 
 
@@ -11,7 +11,7 @@
 	3. Database:
 		This is MSSQL database. In this, we have 'USERDATA' database and a table named "USERINFO". Data will be stored in this table through backend.
 
-###Setting up project:
+Setting up project:
 	
 	1. Checkout the application code locally.
 	
@@ -54,13 +54,13 @@
 Note: Please check the screenshots of running application in the dcoument.
 	
 	
-###Urls to verify the application is running and connected to the database container:
+Urls to verify the application is running and connected to the database container:
 Url1 – localhost:4040
 Url2 – localhost:4040/getUserInfo
 Url3 – localhost:4040/addUser
 
 
-###Other Useful Commands:
+Other Useful Commands:
 	To Stop containers:
                > docker stop msdb_c
                > docker stop backend_c
@@ -80,7 +80,7 @@ Url3 – localhost:4040/addUser
 			   > docker network rm frontend_network
 			   > docker network rm backend_network
 			   
-###Docker Compose:
+Docker Compose:
 	(Make sure to execute above other useful commands before executing compose commands to avoid any name or port related issues)
 	
 	1. Go to the "UserDataApp" directory:
@@ -97,7 +97,7 @@ Url3 – localhost:4040/addUser
 	3. To stop and remove all containers and network, created through this compose command
 		> docker compose down
 
-###Pushing Docker images to a Docker registry:
+Pushing Docker images to a Docker registry:
 	
 	Commands:	
 		> docker login
@@ -105,7 +105,7 @@ Url3 – localhost:4040/addUser
 		> docker push rajatjain20/backend_i:v0
 		> docker push rajatjain20/mssqldb_i:v0
 
-###Implement environment variable management in your Docker Compose file to handle different environments(development, testing, production). 
+Implement environment variable management in your Docker Compose file to handle different environments(development, testing, production). 
 	
 	To implement this, we have a base compose file (docker-compose-base.yml) and environment specific compose files as below:
 	
